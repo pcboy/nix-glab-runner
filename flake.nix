@@ -16,11 +16,15 @@
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
-    in rec {
+    in {
       builders = {
-        gceImage = {extraModules ? []}:
+        gceImage = {
+          extraModules ? [],
+          tagList ? ["nix-runner"],
+        }:
           nixos-generators.nixosGenerate {
             system = "x86_64-linux";
+
             modules =
               [
                 ./configuration.nix

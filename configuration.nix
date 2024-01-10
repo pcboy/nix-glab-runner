@@ -1,7 +1,7 @@
 {
   pkgs,
-  modulesPath,
   lib,
+  modulesPath,
   ...
 }: {
   imports = [
@@ -43,7 +43,7 @@
       services = {
         # runner for building in docker via host's nix-daemon
         # nix store will be readable in runner, can be insecure if no control over the host
-        nix = with lib; {
+        nix = with pkgs.lib; {
           registrationConfigFile = "/etc/gitlab-runner-env";
           dockerImage = "alpine";
           dockerVolumes = [
@@ -85,7 +85,7 @@
             DOCKER_CERT_PATH = "/certs/client";
             FF_NETWORK_PER_BUILD = "true";
           };
-          tagList = ["nix-runner-docker"];
+          tagList = lib.mkDefault ["nix-gitlab-runner"];
         };
       };
     };

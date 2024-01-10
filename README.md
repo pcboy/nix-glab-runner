@@ -96,7 +96,7 @@ But at this moment it seems there is an upstream bug that prevents it to work. S
 extra_config.nix
 
 ```nix
-{...}: {
+{lib, ...}: {
   users.users.pcboy = {
     isNormalUser = true;
     extraGroups = ["wheel" "networkmanager"];
@@ -117,6 +117,8 @@ extra_config.nix
   users.users.pcboy.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAAAAAAAAAAAAAAAAAAAAIJYbLmIWoE5S4UAAeXoh9xjIuKMCZvFdyZmoSY+N/nEw pcboy@host"
   ];
+
+  services.gitlab-runner.services.nix.tagList = lib.mkForce ["nix-runner-docker"];
 }
 ```
 
@@ -131,6 +133,10 @@ Then:
   };
 }
 ```
+
+Note: `tagList` can also be specified. It's the list of [CI tags](https://docs.gitlab.com/ee/ci/yaml/#tags) that the runner should respond to.  
+The default is `nix-gitlab-runner`, but you can overwrite it in your `extra_config.nix` by setting `services.gitlab-runner.services.nix.tagList` (see example).  
+I highly recommend to look at [./configuration.nix](./configuration.nix).
 
 # Sources
 
