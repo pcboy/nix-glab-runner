@@ -12,7 +12,7 @@
     system.stateVersion = "23.11";
     boot.kernel.sysctl."net.ipv4.ip_forward" = true;
 
-    networking.nameservers = ["8.8.8.8"];
+    networking.nameservers = ["8.8.8.8"]; # Todo: include? "169.254.169.254"];
 
     virtualisation.containers.enable = true;
     virtualisation.docker = {
@@ -24,11 +24,13 @@
       settings.auto-optimise-store = true;
       extraOptions = ''
         experimental-features = nix-command flakes
+        min-free = ${toString (100 * 1024 * 1024)}
+        max-free = ${toString (1024 * 1024 * 1024)}
       '';
       gc = {
         automatic = true;
         dates = "weekly";
-        options = "--delete-older-than 30d";
+        options = "--delete-older-than 60d --max-freed $((1024**3))";
       };
     };
 
@@ -79,7 +81,7 @@
             # Careful: This PATH will be shared with the containers gitlab-runner execute.
             # We need to have /usr/local/bin in it if we are using the postgres service in gitlab-ci.yml
             #      PATH = "/nix/var/nix/profiles/default/bin:/nix/var/nix/profiles/default/sbin:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
-            NIX_SSL_CERT_FILE = "/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt";
+            NIX_SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
             DOCKER_DRIVER = "overlay2";
             DOCKER_TLS_VERIFY = "1";
             DOCKER_CERT_PATH = "/certs/client";

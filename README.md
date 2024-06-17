@@ -74,14 +74,14 @@ You can then create an instance with:
 gcloud compute instances create gitlab-runner-nix \
     --project=my-project \
     --zone=us-central1-a \
-    --machine-type=e2-standard-4 \
+    --machine-type=n4-standard-2 \
     --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=us-central1-pri-net \
     --metadata=enable-oslogin=TRUE \
+    --maintenance-policy=MIGRATE \
     --can-ip-forward \
-    --provisioning-model=SPOT \
     --service-account=gitlab-ci-runner@my-project.iam.gserviceaccount.com \
     --scopes=https://www.googleapis.com/auth/cloud-platform \
-    --create-disk=auto-delete=yes,boot=yes,device-name=gitlab-runner-nix,image=projects/my-project/global/images/nixos-image-23-11-x86-64-linux,mode=rw,size=100,type=projects/my-project/zones/us-central1-a/diskTypes/pd-balanced \
+    --create-disk=auto-delete=yes,boot=yes,device-name=gitlab-runner-nix,image=projects/my-project/global/images/nixos-image-23-11-x86-64-linux,mode=rw,provisioned-iops=3600,provisioned-throughput=290,size=100,type=projects/my-project/zones/us-central1-a/diskTypes/hyperdisk-balanced \
     --labels=goog-ec-src=vm_add-gcloud \
     --reservation-affinity=any \
     --metadata-from-file startup-script=./startup.sh

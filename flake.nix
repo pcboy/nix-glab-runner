@@ -50,7 +50,8 @@
             ${pkgs.google-cloud-sdk}/bin/gsutil cp ${gceImage}/*.raw.tar.gz "gs://${bucket}/${imagePrefixName}.raw.tar.gz"
             ${pkgs.google-cloud-sdk}/bin/gcloud compute images create ${builtins.readFile imgId} \
               --source-uri "gs://${bucket}/${imagePrefixName}.raw.tar.gz" \
-              --family="nixos-image-gitlab-runner"
+              --family="nixos-image-gitlab-runner" \
+              --guest-os-features=GVNIC
           '';
       };
     });
