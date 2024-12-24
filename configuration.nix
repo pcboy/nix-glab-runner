@@ -3,7 +3,8 @@
   lib,
   modulesPath,
   ...
-}: {
+}:
+{
   imports = [
     "${modulesPath}/virtualisation/google-compute-image.nix"
   ];
@@ -12,7 +13,7 @@
     system.stateVersion = "23.11";
     boot.kernel.sysctl."net.ipv4.ip_forward" = true;
 
-    networking.nameservers = ["8.8.8.8"]; # Todo: include? "169.254.169.254"];
+    networking.nameservers = [ "8.8.8.8" ]; # Todo: include? "169.254.169.254"];
 
     virtualisation.containers.enable = true;
     virtualisation.docker = {
@@ -22,10 +23,10 @@
 
     nix = {
       settings.auto-optimise-store = true;
-      extraOptions = ''
+      extraOptions = lib.mkDefault ''
         experimental-features = nix-command flakes
-        min-free = ${toString (100 * 1024 * 1024)}
-        max-free = ${toString (1024 * 1024 * 1024)}
+        min-free = ${toString (5 * 1024 * 1024 * 1024)} # 5GB
+        max-free = ${toString (20 * 1024 * 1024 * 1024)} # 20GB
       '';
       gc = {
         automatic = true;
@@ -46,7 +47,7 @@
         # runner for building in docker via host's nix-daemon
         # nix store will be readable in runner, can be insecure if no control over the host
         nix = with pkgs.lib; {
-          registrationConfigFile = "/etc/gitlab-runner-env";
+          authenticationTokenConfigFile = "/etc/gitlab-runner-env";
           dockerImage = "alpine";
           dockerVolumes = [
             "/certs/client"
@@ -72,7 +73,20 @@
 
             . ${pkgs.nix}/etc/profile.d/nix.sh
 
-            ${pkgs.nix}/bin/nix-env -i ${lib.concatStringsSep " " (with pkgs; [nix cacert gnugrep git coreutils bash openssh])}
+            ${pkgs.nix}/bin/nix-env -i ${
+              lib.concatStringsSep " " (
+                with pkgs;
+                [
+                  nix
+                  cacert
+                  gnugrep
+                  git
+                  coreutils
+                  bash
+                  openssh
+                ]
+              )
+            }
           '';
           environmentVariables = {
             ENV = "/etc/profile";
@@ -87,7 +101,6 @@
             DOCKER_CERT_PATH = "/certs/client";
             FF_NETWORK_PER_BUILD = "true";
           };
-          tagList = lib.mkDefault ["nix-gitlab-runner"];
         };
       };
     };
