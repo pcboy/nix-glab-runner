@@ -13,7 +13,24 @@
     system.stateVersion = "23.11";
     boot.kernel.sysctl."net.ipv4.ip_forward" = true;
 
-    networking.nameservers = [ "8.8.8.8" ]; # Todo: include? "169.254.169.254"];
+    services.dnsmasq = {
+      enable = true;
+
+      settings = {
+        server = [
+          "8.8.8.8"
+          "8.8.4.4"
+        ];
+        cache-size = 1000;
+      };
+    };
+
+    networking.nameservers = [ "127.0.0.1" ];
+
+    networking = {
+      networkmanager.enable = true;
+      networkmanager.dns = "dnsmasq";
+    };
 
     virtualisation.containers.enable = true;
     virtualisation.docker = {
@@ -84,6 +101,7 @@
                   coreutils
                   bash
                   openssh
+                  glab
                 ]
               )
             }
