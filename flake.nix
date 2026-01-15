@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixos-generators = {
       url = "github:nix-community/nixos-generators";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,7 +31,8 @@
 
               modules = [
                 ./configuration.nix
-              ] ++ extraModules;
+              ]
+              ++ extraModules;
               format = "gce";
 
               pkgs = nixpkgs.legacyPackages.x86_64-linux;
