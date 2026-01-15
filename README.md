@@ -35,7 +35,7 @@ Flake example:
       packages.uploadGceImage = glabBuilders.uploadGceImage {
         bucket = "gitlab-runner-images-nix";
         gceImage = glabBuilders.gceImage {};
-        imagePrefixName = "nixos-image-24.11.x86_64-linux";
+        imagePrefixName = "nixos-image-25.11.x86_64-linux";
       };
     });
 }
@@ -45,10 +45,10 @@ Then to build the GCE image locally, then upload it, and create the compute imag
 
 ```shell
 $> nix run .\#uploadGceImage
-Copying file:///nix/store/zx0c1gm76q2gzgy6yvcr3pa3mlnxbkah-google-compute-image/nixos-image-24.11.20241224.6723fa4-x86_64-linux.raw.tar.gz [Content-Type=application/x-tar]...
+Copying file:///nix/store/zx0c1gm76q2gzgy6yvcr3pa3mlnxbkah-google-compute-image/nixos-image-25.11.20241224.6723fa4-x86_64-linux.raw.tar.gz [Content-Type=application/x-tar]...
 \ [1 files][681.9 MiB/681.9 MiB]   29.4 MiB/s
 Operation completed over 1 objects/681.9 MiB.
-Created [https://www.googleapis.com/compute/v1/projects/my-project/global/images/nixos-image-24.11-x86-64-linux].
+Created [https://www.googleapis.com/compute/v1/projects/my-project/global/images/nixos-image-25.11-x86-64-linux].
 NAME                            PROJECT               FAMILY                     DEPRECATED  STATUS
 nixos-image-24.11-x86-64-linux  my-project  nixos-image-gitlab-runner              READY
 ```
@@ -65,23 +65,26 @@ For instance, create a `startup.sh` looking like:
 printf "CI_SERVER_URL=https://gitlab.com\nCI_SERVER_TOKEN=glrt-YOUR_TOKEN" > /etc/gitlab-runner-env
 ```
 
-You can then create an instance with:
+You can then create an instance with (just an example, adapt it to your needs):
 
 ```shell
 #!/usr/bin/env nix-shell
 #!nix-shell -i bash -p google-cloud-sdk
 
+ZONE=us-central1-a
+PROJECT="" 
+
 gcloud compute instances create gitlab-runner-nix \
-    --project=my-project \
-    --zone=us-central1-a \
+    --project=${PROJECT} \
+    --zone=${ZONE} \
     --machine-type=n4-standard-2 \
     --network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=us-central1-pri-net \
     --metadata=enable-oslogin=TRUE \
     --maintenance-policy=MIGRATE \
     --can-ip-forward \
-    --service-account=gitlab-ci-runner@my-project.iam.gserviceaccount.com \
+    --service-account=gitlab-ci-runner@${PROJECT}.iam.gserviceaccount.com \
     --scopes=https://www.googleapis.com/auth/cloud-platform \
-    --create-disk=auto-delete=yes,boot=yes,device-name=gitlab-runner-nix,image=projects/my-project/global/images/nixos-image-24.11-x86-64-linux,mode=rw,provisioned-iops=3600,provisioned-throughput=290,size=200,type=projects/my-project/zones/us-central1-a/diskTypes/hyperdisk-balanced \
+    --create-disk=auto-delete=yes,boot=yes,device-name=gitlab-runner-nix,image=projects/${PROJECT}/global/images/nixos-image-24.11-x86-64-linux,mode=rw,provisioned-iops=3600,provisioned-throughput=290,size=200,type=projects/${PROJECT}/zones/${ZONE}/diskTypes/hyperdisk-balanced \
     --labels=goog-ec-src=vm_add-gcloud \
     --reservation-affinity=any \
     --metadata-from-file startup-script=./startup.sh
@@ -127,7 +130,7 @@ Then:
   packages.uploadGceImage = glabBuilders.uploadGceImage {
     bucket = "gitlab-runner-images-nix";
     gceImage = glabBuilders.gceImage {extraModules = [./extra_config.nix];};
-    imagePrefixName = "nixos-image-24.11.x86_64-linux";
+    imagePrefixName = "nixos-image-25.11.x86_64-linux";
   };
 }
 ```
